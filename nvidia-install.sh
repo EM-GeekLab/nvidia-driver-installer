@@ -1263,6 +1263,43 @@ You can find the last exit code in the file:
 EOF
 }
 
+# 预解析函数，只处理需要在脚本早期生效的参数
+# This function does not need i18n support as it runs before language selection.
+pre_parse_arguments() {
+    for arg in "$@"; do
+        case "$arg" in
+            -y|--yes)
+                AUTO_YES=true
+                ;;
+            -q|--quiet)
+                QUIET_MODE=true
+                ;;
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            --show-exit-codes)
+                show_exit_codes
+                exit 0
+                ;;
+        esac
+    done
+
+    # 单独处理 --lang，因为它需要读取下一个参数
+    local i=0
+    local args=("$@")
+    for ((i=0; i<$#; i++)); do
+        if [[ "${args[$i]}" == "--lang" ]]; then
+            # 确保 --lang 后面有值
+            if [[ -n "${args[$((i+1))]}" ]]; then
+                LANG_CURRENT="${args[$((i+1))]}"
+                export NVIDIA_INSTALLER_LANG="$LANG_CURRENT"
+            fi
+            break
+        fi
+    done
+}
+
 # 解析命令行参数
 parse_arguments() {
     while [[ $# -gt 0 ]]; do
@@ -3255,7 +3292,9 @@ select_language() {
 }
 
 # 主函数 (添加状态管理和无交互支持)
-main() {    
+main() {
+    # 预解析命令行参数，在选择语言之前处理一些参数，如--quiet和--auto-yes，这样可以确保在输出任何内容之前就已经设置了这些参数
+    pre_parse_arguments "$@"
     # 语言选择（在任何输出之前）
     select_language
 
