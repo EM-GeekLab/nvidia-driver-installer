@@ -407,7 +407,15 @@ main() {
     preinstall
     addrepo
 
-    pm_inst cuda-toolkit
+    if [[ "$INSTALL_TYPE" == "cuda" || "$INSTALL_TYPE" == "all" ]]; then
+        info "Installing CUDA Toolkit"
+        pm_inst cuda-toolkit
+    fi
+
+    if [[ "$INSTALL_TYPE" == "ctk" || "$INSTALL_TYPE" == "all" ]]; then
+        info "Installing NVIDIA Container Toolkit"
+        pm_inst nvidia-container-toolkit
+    fi
     exit 0
 }
 
@@ -438,6 +446,7 @@ __main() {
     local VERBOSE=0
     local QUIET=0
     local NVIDIA_REPO_BASE_URL="${NVIDIA_REPO_BASE_URL:-"https://developer.download.nvidia.com/compute/cuda/repos"}"
+    local INSTALL_TYPE="cuda"
     local DRY_RUN=
 
     while [[ $# -gt 0 ]]; do
@@ -456,6 +465,13 @@ __main() {
         -n | --dry-run)
             debug "Dry run mode enabled"
             DRY_RUN="echo"
+            ;;
+        --type=*)
+            INSTALL_TYPE="${1#*=}"
+            if [[ "$INSTALL_TYPE" != "cuda" && "$INSTALL_TYPE" != "ctk" && "$INSTALL_TYPE" != "all" ]]; then
+                panic "Invalid install type: $INSTALL_TYPE. Supported types are 'cuda', 'ctk', 'all'."
+            fi
+            debug "Install type set to: $INSTALL_TYPE"
             ;;
         *)
             panic "Unknown option: $1"
