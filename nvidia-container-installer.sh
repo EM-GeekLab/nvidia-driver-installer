@@ -383,9 +383,8 @@ check_and_resume() {
         fi
     else
         log_info "未发现之前的安装记录，开始全新安装"
+        return 0
     fi
-
-    return 1
 }
 
 auto_confirm() {
@@ -409,11 +408,6 @@ auto_confirm() {
 
 # 检查是否以 root 权限运行
 check_root() {
-    if [[ $EUID -eq 0 ]]; then
-        log_error "请不要以 root 用户运行此脚本，脚本将在需要时使用 sudo"
-        exit 1
-    fi
-
     # 检查 sudo 权限
     if ! sudo -v 2>/dev/null; then
         if [[ "$FORCE_INSTALL" == "true" ]]; then
@@ -764,7 +758,7 @@ configure_apt_repo() {
     fi
 
     # 验证下载的文件不为空且包含预期内容
-    if [[ ! -s "$temp_list" ]] || ! grep -q "nvidia-container-toolkit" "$temp_list"; then
+    if [[ ! -s "$temp_list" ]] || ! grep -q "libnvidia-container" "$temp_list"; then
         log_error "下载的仓库列表文件无效或为空"
         rm -f "$temp_list"
         return 1
