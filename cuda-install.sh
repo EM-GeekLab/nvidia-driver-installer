@@ -434,10 +434,16 @@ Options:
     -v, --verbose   Enable verbose output
     -q, --quiet     Enable quiet output
     -n, --dry-run   Enable dry run mode (most changes won't be made)
+    --type=<type>   Specify installation type: 'cuda', 'ctk', or 'all' [Default: 'cuda']
+                    'cuda'  Install CUDA Toolkit only
+                    'ctk'   Install NVIDIA Container Toolkit only
+                    'all'   Install both CUDA and Container Toolkits
 
 Environment Variables:
-    NVIDIA_REPO_BASE_URL   Base URL for the NVIDIA repository [Default: "https://developer.download.nvidia.com/compute/cuda/repos"]
-    TMPDIR                 Temporary directory for storing downloaded files
+    NVIDIA_REPO_BASE_URL    Base URL for the NVIDIA repository 
+                            [Default: "https://developer.download.nvidia.com/compute/cuda/repos"]
+    TMPDIR                  Temporary directory for storing downloaded files
+
 EOF
     exit 0
 }
