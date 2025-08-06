@@ -1,10 +1,44 @@
 #!/bin/bash
 
 # NVIDIA Container Toolkit 全自动化安装脚本
-# 支持交互式和全自动化部署模式，优化中国大陆访问速度
-# 作者: Claude AI Assistant
-# 版本: 2.1
-# 日期: 2025-08-06
+# NVIDIA Container Toolkit One-Click Installer
+
+# Author: PEScn @ EM-GeekLab with Claude AI Assistant
+# Modified: 2025-08-06
+# License: Apache-2.0
+# GitHub: https://github.com/EM-GeekLab/nvidia-driver-installer
+
+# Base on NVIDIA CTK Installation Guide: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+# Supports Ubuntu, CentOS, SUSE, RHEL, Fedora, Amazon Linux, Azure Linux and other distributions.
+# This script need `root` privileges to run, or use `sudo` to run it.
+
+# ==============================================================================
+# Usage | 用法
+# ==============================================================================
+# 1. download the script | 下载脚本
+#
+#   $ curl -sSL https://raw.githubusercontent.com/EM-GeekLab/nvidia-driver-installer/main/nvidia-container-install.sh -o nvidia-container-install.sh
+#
+# 2. [Optional] verify the script's content | 【可选】验证脚本内容
+#
+#   $ cat nvidia-container-install.sh
+#
+# 3. run the script either as root, or using sudo to perform the installation. | 以 root 权限或使用 sudo 运行脚本进行安装
+#
+#   $ sudo bash nvidia-container-install.sh
+#
+# ==============================================================================
+# 
+# Dependencies | 依赖项 : Docker, NVIDIA Driver
+# -----------------------------------------------------------------------------
+# If you don't have Docker and NVIDIA Driver installed, please install them first:
+# 
+# 1. download the script | 下载脚本
+#   $ curl -sSL https://raw.githubusercontent.com/EM-GeekLab/nvidia-driver-installer/main/nvidia-install.sh -o nvidia-install.sh
+# 2. run the script | 运行脚本
+#   $ sudo bash nvidia-install.sh
+#
+# ==============================================================================
 
 set -e # 遇到错误立即退出
 
@@ -448,7 +482,9 @@ check_requirements() {
             log_warning "未检测到 NVIDIA 驱动，但启用了强制模式，继续执行"
         else
             log_error "未检测到 NVIDIA 驱动，请先安装 NVIDIA 驱动"
-            log_info "请参考: https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html"
+            log_info "您可使用我们的 NVIDIA 驱动一键安装脚本进行安装:"
+            log_info "   $ curl -sSL https://raw.githubusercontent.com/EM-GeekLab/nvidia-driver-installer/main/nvidia-install.sh -o nvidia-install.sh"
+            log_info "   $ sudo bash nvidia-install.sh"
 
             if [[ "$AUTOMATED_MODE" != "true" ]]; then
                 if auto_confirm "是否要继续安装（可能会失败）？" false; then

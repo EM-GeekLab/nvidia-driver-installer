@@ -4,10 +4,9 @@
 # NVIDIA Driver One-Click Installer
 
 # Author: PEScn @ EM-GeekLab
-# Modified: 2025-07-09
-# License: MIT
+# Modified: 2025-08-06
+# License: Apache-2.0
 # GitHub: https://github.com/EM-GeekLab/nvidia-driver-installer
-# Website: https://nvidia-install.online
 # Base on NVIDIA Driver Installation Guide: https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html
 # Supports Ubuntu, CentOS, SUSE, RHEL, Fedora, Amazon Linux, Azure Linux and other distributions.
 # This script need `root` privileges to run, or use `sudo` to run it.
