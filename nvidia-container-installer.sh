@@ -744,7 +744,7 @@ configure_apt_repo() {
     # 添加 GPG 密钥
     local gpg_key_url="$NVIDIA_REPO_BASE/gpgkey"
     if ! curl -fsSL --connect-timeout 30 --max-time 60 "$gpg_key_url" |
-        sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg; then
+        sudo gpg --force-dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg; then
         log_error "添加 GPG 密钥失败: $gpg_key_url"
         return 1
     fi
