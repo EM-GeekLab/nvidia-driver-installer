@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/EM-GeekLab/nvidia-driver-installer">
-        <img src="logo.svg" alt="NVIDIA Driver Installer" width="150">
+        <img src="./logo.svg" alt="NVIDIA Driver Installer" width="150">
     </a>
 </p>
 <h1 align="center">NVIDIA 驱动通用安装脚本</h1>

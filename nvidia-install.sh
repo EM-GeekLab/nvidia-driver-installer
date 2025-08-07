@@ -1698,8 +1698,8 @@ check_nvidia_gpu() {
 
             # 提取设备ID
             local pci_address=$(echo "$line" | awk '{print $1}')
-            local device_id=$(lspci -s "$pci_address" -nn | grep -oP '10de:\K[0-9a-fA-F]{4}' | tr '[:lower:]' '[:upper:]')
-            
+            local device_id=$(lspci -s "$pci_address" -nn | grep -oP '10de:\K[0-9a-fA-F]{4}' | tr '[:upper:]' '[:lower:]')
+
             if [[ -n "$device_id" ]]; then
                 local architecture=$(detect_gpu_architecture "$device_id")
                 detected_architectures+=("$architecture")
