@@ -190,24 +190,24 @@ detect_package_manager() {
     return 0
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __pm_inst_apt__() {
     $DRY_RUN apt-get update
     $DRY_RUN apt-get install -y --no-install-recommends "${@}"
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __pm_inst_dnf__() {
     $DRY_RUN dnf install -y --setopt=install_weak_deps=False "${@}"
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __pm_inst_yum__() {
     $DRY_RUN yum clean all
     $DRY_RUN yum install -y --setopt=install_weak_deps=False "${@}"
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __pm_inst_zypper__() {
     $DRY_RUN zypper refresh
     $DRY_RUN zypper install -y "${@}"
@@ -223,7 +223,37 @@ pm_inst() {
     fi
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
+__pm_query_apt__() {
+    apt-cache search -qn "${@}" | sed -E 's/^(\S+) .*$/\1/gm;t'
+}
+
+# shellcheck disable=SC2329
+__pm_query_dnf__() {
+    dnf list --available | sed -E 's/^(\S+) .*$/\1/gm;t' | grep -E "${@}"
+}
+
+# shellcheck disable=SC2329
+__pm_query_yum__() {
+    yum list --available "${@}" | sed -E 's/^(\S+) .*$/\1/gm;t' | grep -E "${@}"
+}
+
+# shellcheck disable=SC2329
+__pm_query_zypper__() {
+    zypper search --match-exact "${@}" | sed -E 's/^(\S+) .*$/\1/gm;t' | grep -E "${@}"
+}
+
+pm_query() {
+    info "Querying package: ${*}"
+    local fn="__pm_query_${pm}__"
+    if declare -F "$fn" &>/dev/null; then
+        "$fn" "${@}"
+    else
+        panic "Unsupported package manager: $pm"
+    fi
+}
+
+# shellcheck disable=SC2329
 __preinstall_rhel_8__() {
     info "Enabling RHEL 8 repositories for CUDA installation"
     $DRY_RUN subscription-manager repos --enable=rhel-8-for-"$arch"-appstream-rpms
@@ -231,7 +261,7 @@ __preinstall_rhel_8__() {
     $DRY_RUN subscription-manager repos --enable=codeready-builder-for-rhel-8-"$arch"-rpms
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_rhel_9__() {
     info "Enabling RHEL 9 repositories for CUDA installation"
     $DRY_RUN subscription-manager repos --enable=rhel-9-for-"$arch"-appstream-rpms
@@ -239,7 +269,7 @@ __preinstall_rhel_9__() {
     $DRY_RUN subscription-manager repos --enable=codeready-builder-for-rhel-9-"$arch"-rpms
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_rhel__() {
     local fn="__preinstall_rhel_${distro_version}__"
     if declare -F "$fn" &>/dev/null; then
@@ -249,19 +279,19 @@ __preinstall_rhel__() {
     fi
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_rocky_8__() {
     info "Enabling Rocky Linux 8 repositories for CUDA installation"
     $DRY_RUN dnf config-manager --set-enabled powertools
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_rocky_9__() {
     info "Enabling Rocky Linux 9 repositories for CUDA installation"
     $DRY_RUN dnf config-manager --set-enabled crb
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_rocky__() {
     local fn="__preinstall_rhel_${distro_version}__"
     if declare -F "$fn" &>/dev/null; then
@@ -271,19 +301,19 @@ __preinstall_rocky__() {
     fi
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_ol_8__() {
     info "Enabling Oracle Linux 8 repositories for CUDA installation"
     $DRY_RUN dnf config-manager --set-enabled ol8_codeready_builder
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_ol_9__() {
     info "Enabling Oracle Linux 9 repositories for CUDA installation"
     $DRY_RUN dnf config-manager --set-enabled ol9_codeready_builder
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_ol__() {
     local fn="__preinstall_ol_${distro_version}__"
     if declare -F "$fn" &>/dev/null; then
@@ -293,7 +323,7 @@ __preinstall_ol__() {
     fi
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __preinstall_debian__() {
     $DRY_RUN add-apt-repository contrib
 }
@@ -309,7 +339,7 @@ preinstall() {
     fi
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __addrepo_debian__() {
     local temp_dir
     temp_dir=$(mktemp -d cuda-repo-XXXXXX)
@@ -319,32 +349,32 @@ __addrepo_debian__() {
     $DRY_RUN rm -rf "$temp_dir"
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __addrepo_ubuntu__() {
     __addrepo_debian__
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __addrepo_fedora__() {
     $DRY_RUN dnf config-manager --add-repo "${repo_url}/cuda-${distro}.repo"
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __addrepo_rhel__() {
     __addrepo_fedora__
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __addrepo_rocky__() {
     __addrepo_fedora__
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __addrepo_sles__() {
     $DRY_RUN zypper addrepo "$repo_url/cuda-$distro.repo"
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 __addrepo_opensuse__() {
     __addrepo_sles__
 }
@@ -357,6 +387,58 @@ addrepo() {
         "$fn"
     else
         info "No add-repository step required for ${distro_id}"
+    fi
+}
+
+select_cuda_version() {
+    local callback_variable_name="$1"
+    info "Selecting CUDA version interactively"
+    local versions
+    versions=$(pm_query "^cuda-[0-9]+-[0-9]+" | sed -E 's/^cuda-(.+)$/\1/' | sort -u)
+
+    if [[ -z "$versions" ]]; then
+        panic "No available CUDA versions found in the repository."
+    fi
+
+    version_array=()
+    read -r -a version_array <<< "$versions"
+
+    echo "=================================================="
+    echo "Available CUDA versions:"
+    select version in "${version_array[@]}"; do
+        if [[ -n "$version" ]]; then
+            eval "$callback_variable_name=\"$version\""
+            break
+        fi
+    done
+}
+
+install_cuda() {
+    debug "Begin to install CUDA Toolkit"
+    if [[ "$INSTALL_TYPE" == "cuda" || "$INSTALL_TYPE" == "all" ]]; then
+        info "Installing CUDA Toolkit"
+        if [[ "$CUDA_VERSION" == "auto" ]]; then
+            pm_inst cuda
+        elif [[ -n "$CUDA_VERSION" ]]; then
+            pm_inst "cuda-$CUDA_VERSION"
+        else
+            info "No specific CUDA version provided, selecting interactively"
+            local __ver
+            select_cuda_version __ver
+            pm_inst "cuda-$__ver"
+        fi
+    else 
+        info "Skipping CUDA Toolkit installation as per INSTALL_TYPE: $INSTALL_TYPE"
+    fi
+}
+
+install_ctk() {
+    debug "Begin to install NVIDIA Container Toolkit"
+    if [[ "$INSTALL_TYPE" == "ctk" || "$INSTALL_TYPE" == "all" ]]; then
+        info "Installing NVIDIA Container Toolkit"
+        pm_inst nvidia-container-toolkit
+    else 
+        info "Skipping NVIDIA Container Toolkit installation as per INSTALL_TYPE: $INSTALL_TYPE"
     fi
 }
 
@@ -406,16 +488,9 @@ main() {
 
     preinstall
     addrepo
+    install_cuda
+    install_ctk
 
-    if [[ "$INSTALL_TYPE" == "cuda" || "$INSTALL_TYPE" == "all" ]]; then
-        info "Installing CUDA Toolkit"
-        pm_inst cuda-toolkit
-    fi
-
-    if [[ "$INSTALL_TYPE" == "ctk" || "$INSTALL_TYPE" == "all" ]]; then
-        info "Installing NVIDIA Container Toolkit"
-        pm_inst nvidia-container-toolkit
-    fi
     exit 0
 }
 
@@ -434,10 +509,15 @@ Options:
     -v, --verbose   Enable verbose output
     -q, --quiet     Enable quiet output
     -n, --dry-run   Enable dry run mode (most changes won't be made)
-    --type=<type>   Specify installation type: 'cuda', 'ctk', or 'all' [Default: 'cuda']
+    --type=<type>   Specify installation type: 'cuda', 'ctk', 'all', 'none' [Default: 'cuda']
                     'cuda'  Install CUDA Toolkit only
                     'ctk'   Install NVIDIA Container Toolkit only
                     'all'   Install both CUDA and Container Toolkits
+                    'none'  Do not install anything (configure repository only)
+    --cuda-version=<version> Specify CUDA version to install
+                    <version>  Specific version to install (e.g. '12-9')
+                    'auto'  Automatically detect and install the latest supported version
+                    leave empty to select interactively
 
 Environment Variables:
     NVIDIA_REPO_BASE_URL    Base URL for the NVIDIA repository 
@@ -454,6 +534,7 @@ __main() {
     local NVIDIA_REPO_BASE_URL="${NVIDIA_REPO_BASE_URL:-"https://developer.download.nvidia.com/compute/cuda/repos"}"
     local INSTALL_TYPE="cuda"
     local DRY_RUN=
+    local CUDA_VERSION=
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -474,10 +555,14 @@ __main() {
             ;;
         --type=*)
             INSTALL_TYPE="${1#*=}"
-            if [[ "$INSTALL_TYPE" != "cuda" && "$INSTALL_TYPE" != "ctk" && "$INSTALL_TYPE" != "all" ]]; then
-                panic "Invalid install type: $INSTALL_TYPE. Supported types are 'cuda', 'ctk', 'all'."
+            if [[ "xx${INSTALL_TYPE}xx" =~ ^xx(cuda|ctk|all|none)xx$ ]]; then
+                panic "Invalid install type: $INSTALL_TYPE. Supported types are 'cuda', 'ctk', 'all', 'none'."
             fi
             debug "Install type set to: $INSTALL_TYPE"
+            ;;
+        --cuda-version=*)
+            CUDA_VERSION="${1#*=}"
+            debug "CUDA version set to: $CUDA_VERSION"
             ;;
         *)
             panic "Unknown option: $1"
