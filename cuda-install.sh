@@ -394,14 +394,18 @@ select_cuda_version() {
     local callback_variable_name="$1"
     info "Selecting CUDA version interactively"
     local versions
-    versions=$(pm_query "^cuda-[0-9]+-[0-9]+" | sed -E 's/^cuda-(.+)$/\1/' | sort -u)
+    versions="$(pm_query "^cuda-[0-9]+-[0-9]+" | sed -E 's/^cuda-(.+)$/\1/' | sort -u)"
+    debug "pm_query returned: $versions"
 
     if [[ -z "$versions" ]]; then
         panic "No available CUDA versions found in the repository."
     fi
 
-    version_array=()
-    read -r -a version_array <<< "$versions"
+    # shellcheck disable=SC2206
+    version_array=( $versions )
+    for v in "${version_array[@]}"; do
+        debug "Found available CUDA version: $v"
+    done
 
     echo "=================================================="
     echo "Available CUDA versions:"
@@ -518,6 +522,7 @@ Options:
                     <version>  Specific version to install (e.g. '12-9')
                     'auto'  Automatically detect and install the latest supported version
                     leave empty to select interactively
+    --use-cn-cdn    Replace NVIDIA_REPO_BASE_URL with "https://developer.download.nvidia.cn"
 
 Environment Variables:
     NVIDIA_REPO_BASE_URL    Base URL for the NVIDIA repository 
@@ -563,6 +568,10 @@ __main() {
         --cuda-version=*)
             CUDA_VERSION="${1#*=}"
             debug "CUDA version set to: $CUDA_VERSION"
+            ;;
+        --use-cn-cdn)
+            NVIDIA_REPO_BASE_URL="https://developer.download.nvidia.cn/compute/cuda/repos"
+            debug "Using CN CDN for NVIDIA repository"
             ;;
         *)
             panic "Unknown option: $1"
