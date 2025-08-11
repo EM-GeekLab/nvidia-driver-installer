@@ -560,7 +560,7 @@ __main() {
             ;;
         --type=*)
             INSTALL_TYPE="${1#*=}"
-            if [[ "xx${INSTALL_TYPE}xx" =~ ^xx(cuda|ctk|all|none)xx$ ]]; then
+            if ! [[ "${INSTALL_TYPE}" =~ ^(cuda|ctk|all|none)$ ]]; then
                 panic "Invalid install type: $INSTALL_TYPE. Supported types are 'cuda', 'ctk', 'all', 'none'."
             fi
             debug "Install type set to: $INSTALL_TYPE"
