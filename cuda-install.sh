@@ -347,6 +347,7 @@ __addrepo_debian__() {
     $DRY_RUN wget "${repo_url}/cuda-keyring_1.1-1_all.deb" -O "$temp_dir/cuda-keyring_1.1-1_all.deb"
     $DRY_RUN env DEBIAN_FRONTEND=noninteractive dpkg -i "$temp_dir/cuda-keyring_1.1-1_all.deb"
     $DRY_RUN rm -rf "$temp_dir"
+    $DRY_RUN apt-get update
 }
 
 # shellcheck disable=SC2329
