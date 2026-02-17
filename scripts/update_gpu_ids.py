@@ -96,6 +96,8 @@ _NON_GPU_RE = re.compile("|".join(NON_GPU_PATTERNS), re.IGNORECASE)
 def fetch_pci_ids(source: str = "github") -> str:
     """Download the pci.ids database."""
     url = SOURCES.get(source, source)
+    if not url.startswith("https://"):
+        raise ValueError(f"Refusing to fetch from non-HTTPS URL: {url}")
     print(f"Fetching PCI IDs from {url}...")
 
     req = urllib.request.Request(url, headers={"User-Agent": "nvidia-driver-installer/update_gpu_ids"})
