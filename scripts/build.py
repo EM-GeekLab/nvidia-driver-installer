@@ -159,6 +159,7 @@ def build_script(
     """Build a single script by merging template with language packs and data."""
     script_name = template_path.stem
     template_content = read_file(template_path)
+    outdir.mkdir(parents=True, exist_ok=True)
 
     # --- Language Packs ---
     if LANG_PACKS_PLACEHOLDER in template_content:
@@ -194,7 +195,6 @@ def build_script(
         template_content = template_content.replace(GPU_IDS_PLACEHOLDER, gpu_content)
 
     # --- Write output ---
-    outdir.mkdir(parents=True, exist_ok=True)
     output_path = outdir / f"{script_name}.sh"
     output_path.write_text(template_content, encoding="utf-8")
     output_path.chmod(0o755)
