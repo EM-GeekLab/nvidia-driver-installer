@@ -23,7 +23,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 
 # Resolve project root (parent of scripts/)
@@ -75,9 +74,11 @@ def read_file(path: Path) -> str:
 
 
 def extract_gettext_keys(template_content: str) -> set[str]:
-    """Extract all gettext key references from a template script."""
-    # Match $(gettext "key") and $(gettext 'key')
-    # Skip variable references like gettext "$variable"
+    """Extract all gettext key references from a template script.
+
+    Handles both literal keys (gettext "key") and dynamic keys annotated with
+    # GETTEXT_DYNAMIC: key1 key2 key3
+    """
     keys = set()
     for match in re.finditer(r'gettext\s+"([^"]+)"', template_content):
         key = match.group(1)
@@ -87,6 +88,10 @@ def extract_gettext_keys(template_content: str) -> set[str]:
         key = match.group(1)
         if not key.startswith("$"):
             keys.add(key)
+    # Support dynamic key annotations: # GETTEXT_DYNAMIC: key1 key2 ...
+    for match in re.finditer(r"#\s*GETTEXT_DYNAMIC:\s*(.+)", template_content):
+        for key in match.group(1).split():
+            keys.add(key.strip())
     return keys
 
 
@@ -194,16 +199,19 @@ def build_script(
 
         template_content = template_content.replace(GPU_IDS_PLACEHOLDER, gpu_content)
 
-    # --- Write output ---
+    # --- Write to temp file, validate, then rename ---
     output_path = outdir / f"{script_name}.sh"
-    output_path.write_text(template_content, encoding="utf-8")
-    output_path.chmod(0o755)
+    temp_path = outdir / f".{script_name}.sh.tmp"
+    temp_path.write_text(template_content, encoding="utf-8")
+    temp_path.chmod(0o755)
 
-    # --- Syntax check final output ---
+    # --- Syntax check before finalizing ---
     if not skip_syntax_check:
-        if not validate_syntax(output_path):
+        if not validate_syntax(temp_path):
+            temp_path.unlink(missing_ok=True)
             return False
 
+    temp_path.rename(output_path)
     print(f"  Built: {output_path} ({len(template_content.splitlines())} lines)")
     return True
 
@@ -237,7 +245,7 @@ def main():
     )
     args = parser.parse_args()
 
-    langs = args.langs.split(",") if args.langs else None
+    langs = [lang.strip() for lang in args.langs.split(",")] if args.langs else None
     outdir = Path(args.outdir)
 
     templates = find_templates(args.target)

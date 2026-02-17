@@ -171,7 +171,9 @@ cleanup_temp_files() {
     find /tmp -maxdepth 1 \( \
         -name "cuda-repo-*" -o \
         -name "cuda-keyring*.deb" \
-    \) -print -delete 2>/dev/null || true
+    \) -print -exec rm -rf {} + 2>/dev/null || true
+    find "${TMPDIR:-/tmp}" -maxdepth 1 -type d \
+        -name "cuda-repo-*" -print -exec rm -rf {} + 2>/dev/null || true
 }
 
 cleanup_lock_files() {
@@ -691,6 +693,11 @@ __addrepo_rocky__() {
 __addrepo_sles__() {
     $DRY_RUN zypper addrepo "$repo_url/cuda-$distro.repo"
     save_rollback_info "zypper removerepo cuda-$distro"
+}
+
+# shellcheck disable=SC2329
+__addrepo_ol__() {
+    __addrepo_fedora__
 }
 
 # shellcheck disable=SC2329

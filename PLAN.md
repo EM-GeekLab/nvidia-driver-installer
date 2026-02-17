@@ -439,7 +439,7 @@ and generate data/gpu-ids.sh with architecture mapping.
 # 1. Download https://pci-ids.ucw.cz/v2.2/pci.ids (or GitHub mirror)
 # 2. Parse vendor 10de section
 # 3. For each device entry, extract chip code from device name
-#    (regex: r'\b(G[MKPV]|TU|GA|GH|AD|GB)\d{2,3}\b')
+#    (regex: r'\b(GK|GM|GP|GV|TU|GA|GH|AD|GB)\d{2,3}\b')
 # 4. Map chip code prefix → architecture
 # 5. Generate data/gpu-ids.sh
 

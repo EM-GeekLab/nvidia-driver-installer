@@ -98,5 +98,4 @@ LANG_PACK_EN_US=(
 
     # Final
     ["final.success"]="CUDA Toolkit installation completed!"
-    ["final.summary.header"]="Installation Summary"
 )

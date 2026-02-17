@@ -1,6 +1,6 @@
 declare -A LANG_PACK_EN_US
 
-# 英文语言包
+# English language pack
 LANG_PACK_EN_US=(
     ["exit.handler.receive_signal"]="Received signal:"
     ["exit.handler.exit_code"]="Exit code:"

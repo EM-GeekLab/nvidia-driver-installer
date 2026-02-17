@@ -238,7 +238,8 @@ create_install_lock() {
     local lock_file="$STATE_DIR/.install.lock"
     
     if [[ -f "$lock_file" ]]; then
-        local lock_pid=$(cat "$lock_file" 2>/dev/null)
+        local lock_pid
+        lock_pid=$(cat "$lock_file" 2>/dev/null)
         if [[ -n "$lock_pid" ]] && kill -0 "$lock_pid" 2>/dev/null; then
             exit_with_code $EXIT_STATE_FILE_CORRUPTED "$(gettext "state.lock.error.another_install_running") $lock_pid"
         else
@@ -464,6 +465,7 @@ NVIDIA驱动安装脚本 - 退出码说明
 ═══════════════════════════════════════════════════════════════
 EOF
 
+    # GETTEXT_DYNAMIC: exit_code.permission exit_code.hardware exit_code.compatibility exit_code.config exit_code.secure_boot exit_code.conflict exit_code.network exit_code.pkg_manager exit_code.system_state exit_code.state_management
     local -a categories=(
         "exit_code.permission|1 2 3"
         "exit_code.hardware|10 11 12"
@@ -792,16 +794,16 @@ detect_gpu_architecture() {
 # 检查架构是否支持开源模块
 is_open_module_supported() {
     local architecture="$1"
-    
+
     case "$architecture" in
-        "Turing"|"Ampere"|"Ada Lovelace"|"Blackwell")
+        "Turing"|"Ampere"|"Hopper"|"Ada Lovelace"|"Blackwell")
             return 0  # 支持开源模块
             ;;
-        "Maxwell"|"Pascal"|"Volta")
+        "Kepler"|"Maxwell"|"Pascal"|"Volta")
             return 1  # 需要专有模块
             ;;
         *)
-            return 1  # 未知架构，保守选择专有模块
+            return 0  # 未知架构，默认使用开源模块
             ;;
     esac
 }

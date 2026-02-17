@@ -16,9 +16,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
+
+# Reuse extraction logic from build.py to avoid duplication
+from build import extract_gettext_keys, extract_lang_pack_keys
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = PROJECT_ROOT / "src"
@@ -28,32 +30,13 @@ LANG_DIR = PROJECT_ROOT / "lang"
 def extract_keys_from_script(path: Path) -> list[str]:
     """Extract all gettext keys from a shell script, preserving order."""
     content = path.read_text(encoding="utf-8")
-    seen = set()
-    keys = []
-
-    for pattern in [r'gettext\s+"([^"]+)"', r"gettext\s+'([^']+)'"]:
-        for match in re.finditer(pattern, content):
-            key = match.group(1)
-            # Skip variable references like gettext "$variable"
-            if key.startswith("$"):
-                continue
-            if key not in seen:
-                seen.add(key)
-                keys.append(key)
-    return keys
+    return sorted(extract_gettext_keys(content))
 
 
 def extract_keys_from_lang_pack(path: Path) -> list[str]:
     """Extract all keys defined in a language pack file."""
     content = path.read_text(encoding="utf-8")
-    seen = set()
-    keys = []
-    for match in re.finditer(r'\["([^"]+)"\]', content):
-        key = match.group(1)
-        if key not in seen:
-            seen.add(key)
-            keys.append(key)
-    return keys
+    return sorted(extract_lang_pack_keys(content))
 
 
 def show_keys(script_path: Path) -> None:

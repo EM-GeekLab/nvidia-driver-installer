@@ -98,5 +98,4 @@ LANG_PACK_ZH_CN=(
 
     # 完成
     ["final.success"]="CUDA Toolkit 安装完成!"
-    ["final.summary.header"]="安装摘要"
 )
