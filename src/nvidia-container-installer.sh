@@ -298,7 +298,8 @@ acquire_lock() {
 
     # 检查是否存在锁文件
     if [[ -f "$LOCK_FILE" ]]; then
-        local lock_pid=$(cat "$LOCK_FILE" 2>/dev/null)
+        local lock_pid
+        lock_pid=$(cat "$LOCK_FILE" 2>/dev/null)
 
         # 检查锁文件中的进程是否仍在运行
         if [[ -n "$lock_pid" ]] && kill -0 "$lock_pid" 2>/dev/null; then
@@ -323,7 +324,8 @@ acquire_lock() {
 
 release_lock() {
     if [[ -f "$LOCK_FILE" ]]; then
-        local lock_pid=$(cat "$LOCK_FILE" 2>/dev/null)
+        local lock_pid
+        lock_pid=$(cat "$LOCK_FILE" 2>/dev/null)
         if [[ "$lock_pid" == "$PID" ]]; then
             rm -f "$LOCK_FILE"
             log_info "释放安装锁"

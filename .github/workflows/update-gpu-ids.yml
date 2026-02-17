@@ -1,0 +1,51 @@
+name: Update GPU ID Database
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # Weekly on Monday
+  workflow_dispatch:       # Manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate GPU ID database
+        run: python3 scripts/update_gpu_ids.py
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet data/gpu-ids.sh; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "## GPU ID Database Changes" >> $GITHUB_STEP_SUMMARY
+            git diff --stat data/gpu-ids.sh >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create PR if changed
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: "chore: update GPU PCI device ID database"
+          body: |
+            Auto-generated from [pci-ids.ucw.cz](https://pci-ids.ucw.cz/).
+
+            This PR updates the NVIDIA GPU PCI device ID database used for
+            architecture detection and open/proprietary kernel module selection.
+
+            Please review the diff for new GPU architecture entries.
+          branch: auto/update-gpu-ids
+          commit-message: "chore: update GPU PCI device ID database"
+          labels: automated

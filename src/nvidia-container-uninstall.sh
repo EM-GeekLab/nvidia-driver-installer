@@ -3,7 +3,7 @@
 # NVIDIA Container Toolkit 全自动化卸载脚本
 
 # Author: PEScn @ EM-GeekLab
-# Modified: 2025-08-07
+# Modified: 2026-02-17
 # License: Apache License 2.0
 # GitHub: https://github.com/EM-GeekLab/nvidia-driver-installer
 
@@ -12,6 +12,7 @@ set -e # 遇到错误立即退出
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
@@ -25,6 +26,7 @@ log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 # 全局变量
 PACKAGE_MANAGER=""
 OS_ID=""
+AUTO_YES=false
 
 # 检测操作系统
 detect_os() {
@@ -163,22 +165,53 @@ cleanup_script_files() {
     log_success "临时文件清理完成。"
 }
 
+# 解析命令行参数
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -y|--yes)
+                AUTO_YES=true
+                shift
+                ;;
+            -h|--help)
+                echo "用法: $0 [选项]"
+                echo ""
+                echo "选项:"
+                echo "    -y, --yes    自动确认所有提示 (无交互模式)"
+                echo "    -h, --help   显示此帮助信息"
+                exit 0
+                ;;
+            *)
+                log_error "未知选项: $1"
+                exit 1
+                ;;
+        esac
+    done
+}
+
 # 主函数
 main() {
+    parse_arguments "$@"
+
     if [[ $EUID -ne 0 ]]; then
         log_error "此脚本需要以 root 权限运行，请使用 'sudo ./uninstall_nvidia_toolkit.sh'"
         exit 1
     fi
-    
+
     echo "=========================================="
     echo "NVIDIA Container Toolkit 卸载程序"
     echo "=========================================="
     echo
-    read -p "这将永久移除 NVIDIA Container Toolkit 及其配置。是否继续? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        log_info "操作已取消。"
-        exit 0
+
+    if [[ "$AUTO_YES" != "true" ]]; then
+        read -p "这将永久移除 NVIDIA Container Toolkit 及其配置。是否继续? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            log_info "操作已取消。"
+            exit 0
+        fi
+    else
+        log_info "自动确认模式，跳过交互确认。"
     fi
 
     detect_os
