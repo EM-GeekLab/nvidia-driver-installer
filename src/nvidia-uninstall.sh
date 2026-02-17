@@ -3,8 +3,8 @@
 # NVIDIA 驱动卸载脚本
 
 # Author: PEScn @ EM-GeekLab
-# Modified: 2025-01-02
-# License: MIT
+# Modified: 2026-02-17
+# License: Apache-2.0
 # GitHub: https://github.com/EM-GeekLab/nvidia-driver-installer
 # Website: https://nvidia-install.online
 # 支持 RHEL系、SUSE系、Debian系、Fedora、Amazon Linux、Azure Linux等发行版

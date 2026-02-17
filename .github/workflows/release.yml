@@ -1,0 +1,34 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Build scripts
+        run: python3 scripts/build.py --outdir ./dist
+
+      - name: Verify syntax
+        run: |
+          for f in dist/*.sh; do
+            bash -n "$f"
+            echo "OK: $f"
+          done
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.sh
