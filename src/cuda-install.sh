@@ -161,7 +161,8 @@ cleanup_on_exit() {
     fi
 
     case "$signal" in
-        "INT"|"TERM") exit 130 ;;
+        "INT")  exit 130 ;;  # 128 + SIGINT(2)
+        "TERM") exit 143 ;;  # 128 + SIGTERM(15)
         "EXIT")       exit $exit_code ;;
         *)            exit 1 ;;
     esac
@@ -286,7 +287,7 @@ create_install_lock() {
         local lock_pid
         lock_pid=$(cat "$lock_file" 2>/dev/null)
         if [[ -n "$lock_pid" ]] && kill -0 "$lock_pid" 2>/dev/null; then
-            exit_with_code $EXIT_STATE_FILE_CORRUPTED "$(gettext "state.lock.another_running") $lock_pid)"
+            exit_with_code $EXIT_STATE_FILE_CORRUPTED "$(gettext "state.lock.another_running") ($lock_pid)"
         else
             warn "$(gettext "state.lock.cleaning_orphaned")"
             rm -f "$lock_file"
@@ -958,6 +959,9 @@ __main() {
             AUTO_YES=true
             ;;
         --lang)
+            if [[ -z "${2:-}" ]]; then
+                exit_with_code $EXIT_INVALID_ARGS "$(gettext "args.error.missing_value"): --lang"
+            fi
             LANG_CURRENT="${2:-}"
             shift
             ;;

@@ -85,6 +85,7 @@ LANG_PACK_ZH_CN=(
     ["exit_code.state_dir_failed"]="无法创建状态目录"
     ["exit_code.unsupported_os"]="不支持的操作系统"
     ["exit_code.unsupported_arch"]="不支持的架构"
+    ["args.error.missing_value"]="缺少选项值"
     ["exit_code.invalid_args"]="无效的命令行参数"
     ["exit_code.invalid_install_type"]="无效的安装类型"
     ["exit_code.network_failed"]="网络连接失败"

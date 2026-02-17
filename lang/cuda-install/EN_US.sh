@@ -85,6 +85,7 @@ LANG_PACK_EN_US=(
     ["exit_code.state_dir_failed"]="Failed to create state directory"
     ["exit_code.unsupported_os"]="Unsupported operating system"
     ["exit_code.unsupported_arch"]="Unsupported architecture"
+    ["args.error.missing_value"]="Missing value for option"
     ["exit_code.invalid_args"]="Invalid command-line arguments"
     ["exit_code.invalid_install_type"]="Invalid installation type"
     ["exit_code.network_failed"]="Network connection failed"

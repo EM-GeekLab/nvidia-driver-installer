@@ -193,8 +193,11 @@ cleanup_on_exit() {
     
     # 根据信号设置适当的退出码
     case "$signal" in
-        "INT"|"TERM")
-            exit 130  # 标准的信号中断退出码
+        "INT")
+            exit 130  # 128 + SIGINT(2)
+            ;;
+        "TERM")
+            exit 143  # 128 + SIGTERM(15)
             ;;
         "EXIT")
             exit $exit_code  # 保持原始退出码
@@ -2448,14 +2451,14 @@ main() {
         echo -e "${NC}"
     fi
     
-    # 创建状态目录
-    create_state_dir
-    
-    # 解析命令行参数
-    parse_arguments "$@"
-    
     # 检查root权限
     check_root
+
+    # 创建状态目录
+    create_state_dir
+
+    # 解析命令行参数
+    parse_arguments "$@"
     
     # 检查上次安装状态
     local last_state=$(get_last_state)
@@ -2636,11 +2639,15 @@ main() {
             echo "$(gettext "main.reboot_logic.reason_module_load")"
         fi
         
-        if [[ "$AUTO_YES" == "true" ]] || [[ "$REBOOT_AFTER_INSTALL" == "true" ]]; then
+        if [[ "$REBOOT_AFTER_INSTALL" == "true" ]]; then
             log_info "$(gettext "main.reboot_logic.info_auto_mode_rebooting")"
             rm -f "$STATE_FILE" "$ROLLBACK_FILE" "$STATE_DIR/nouveau_status" "$STATE_DIR/driver_status"
             cleanup_lock_files
             reboot
+        elif [[ "$AUTO_YES" == "true" ]]; then
+            log_warning "$(gettext "main.reboot_logic.warning_manual_reboot_needed")"
+            log_info "$(gettext "main.reboot_logic.info_verify_after_reboot")"
+            cleanup_lock_files
         else
             if confirm "$(gettext "main.reboot_logic.confirm_reboot_now")" "Y"; then
                 log_info "$(gettext "main.reboot_logic.info_rebooting_now")"
