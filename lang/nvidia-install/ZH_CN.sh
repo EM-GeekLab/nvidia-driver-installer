@@ -65,6 +65,7 @@ LANG_PACK_ZH_CN=(
     ["select_option.prompt.invalid_choice"]="无效选择，可选范围:"
     ["args.info.auto_mode_enabled"]="自动化模式已启用"
     ["args.info.quiet_mode_enabled"]="静默模式已启用"
+    ["args.error.missing_value"]="缺少选项值:"
     ["args.error.invalid_module_type"]="无效的模块类型:"
     ["args.info.valid_types"]="(应为 open 或 proprietary)"
     ["args.error.unknown_arg"]="未知选项:"

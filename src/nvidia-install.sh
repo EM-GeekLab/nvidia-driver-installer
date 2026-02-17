@@ -115,7 +115,6 @@ AUTO_YES=false
 QUIET_MODE=false
 REBOOT_AFTER_INSTALL=false
 DRIVER_VERSION=""
-DRY_RUN=""
 
 # 状态跟踪文件
 STATE_DIR="/var/lib/nvidia-installer"
@@ -420,7 +419,6 @@ show_usage() {
     --auto-reboot           安装完成后自动重启
 
 高级选项:
-    -n, --dry-run           模拟运行，不实际执行安装操作
     --cleanup               清理失败的安装状态并退出
     --rollback              回滚到安装前状态
     --show-exit-codes       显示所有退出码及其含义
@@ -522,10 +520,16 @@ parse_arguments() {
                 exit 0
                 ;;
             -t|--type)
+                if [[ -z "${2:-}" ]]; then
+                    exit_with_code $EXIT_INVALID_ARGS "$(gettext "args.error.missing_value") --type"
+                fi
                 INSTALL_TYPE="$2"
                 shift 2
                 ;;
             -m|--modules)
+                if [[ -z "${2:-}" ]]; then
+                    exit_with_code $EXIT_INVALID_ARGS "$(gettext "args.error.missing_value") --modules"
+                fi
                 if [[ "$2" == "proprietary" ]]; then
                     USE_OPEN_MODULES=false
                 elif [[ "$2" == "open" ]]; then
@@ -540,6 +544,9 @@ parse_arguments() {
                 shift
                 ;;
             -v|--version)
+                if [[ -z "${2:-}" ]]; then
+                    exit_with_code $EXIT_INVALID_ARGS "$(gettext "args.error.missing_value") --version"
+                fi
                 DRIVER_VERSION="$2"
                 shift 2
                 ;;
@@ -564,6 +571,9 @@ parse_arguments() {
                 shift
                 ;;
             --lang)
+                if [[ -z "${2:-}" ]]; then
+                    exit_with_code $EXIT_INVALID_ARGS "$(gettext "args.error.missing_value") --lang"
+                fi
                 LANG_CURRENT="$2"
                 shift 2
                 ;;
@@ -578,10 +588,6 @@ parse_arguments() {
             --show-exit-codes)
                 show_exit_codes
                 exit 0
-                ;;
-            -n|--dry-run)
-                DRY_RUN="echo"
-                shift
                 ;;
             *)
                 exit_with_code $EXIT_INVALID_ARGS "$(gettext "args.error.unknown_arg") $1"
@@ -1226,8 +1232,11 @@ check_secure_boot() {
     
     # 方法1: 检查/sys/firmware/efi/efivars
     if [[ -d /sys/firmware/efi/efivars ]]; then
-        if [[ -f /sys/firmware/efi/efivars/SecureBoot-* ]]; then
-            local secure_boot_value=$(od -An -t u1 /sys/firmware/efi/efivars/SecureBoot-* 2>/dev/null | tr -d ' ')
+        local sb_file
+        sb_file=$(compgen -G "/sys/firmware/efi/efivars/SecureBoot-*" | head -n1)
+        if [[ -n "$sb_file" && -f "$sb_file" ]]; then
+            local secure_boot_value
+            secure_boot_value=$(od -An -t u1 "$sb_file" 2>/dev/null | tr -d ' ')
             if [[ "$secure_boot_value" =~ 1$ ]]; then
                 secure_boot_enabled=true
                 secure_boot_method="efivars"
@@ -2324,8 +2333,11 @@ show_next_steps() {
     fi
     
     # Secure Boot相关提示
-    if [[ -d /sys/firmware/efi/efivars ]] && [[ -f /sys/firmware/efi/efivars/SecureBoot-* ]]; then
-        local sb_value=$(od -An -t u1 /sys/firmware/efi/efivars/SecureBoot-* 2>/dev/null | tr -d ' ')
+    local sb_file_check
+    sb_file_check=$(compgen -G "/sys/firmware/efi/efivars/SecureBoot-*" 2>/dev/null | head -n1)
+    if [[ -d /sys/firmware/efi/efivars ]] && [[ -n "$sb_file_check" && -f "$sb_file_check" ]]; then
+        local sb_value
+        sb_value=$(od -An -t u1 "$sb_file_check" 2>/dev/null | tr -d ' ')
         if [[ "$sb_value" =~ 1$ ]]; then
             echo
             echo -e "${YELLOW}$(gettext "final.next_steps.secure_boot.header")${NC}"

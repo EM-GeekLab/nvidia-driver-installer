@@ -298,6 +298,8 @@ def main():
         if arch in CHIP_TO_ARCH.values():
             arch_devices[arch].append(device_id)
             print(f"Override: {device_id} → {arch}")
+        else:
+            print(f"Warning: skipping override '{device_id}' with unknown architecture '{arch}'", file=sys.stderr)
 
     # Deduplicate
     for arch in arch_devices:

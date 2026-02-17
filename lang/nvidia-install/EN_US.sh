@@ -63,6 +63,7 @@ LANG_PACK_EN_US=(
     ["select_option.prompt.range"]="Please enter your choice"
     ["select_option.prompt.default"]="default"
     ["select_option.prompt.invalid_choice"]="Invalid choice, please enter a number between"
+    ["args.error.missing_value"]="Missing value for option:"
     ["args.error.invalid_module_type"]="Invalid module type:"
     ["args.info.valid_types"]="Valid types are 'open' or 'proprietary'"
     ["args.error.unknown_arg"]="Unknown argument:"

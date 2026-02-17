@@ -260,6 +260,10 @@ confirm() {
     local answer
     echo -n -e "$prompt $(gettext "prompt.confirm.yes_or_no") "
     read -r answer
+    # 空输入时采用默认值
+    if [[ -z "$answer" ]]; then
+        answer="$default"
+    fi
     case "${answer,,}" in
         y|yes) return 0 ;;
         *)     return 1 ;;
